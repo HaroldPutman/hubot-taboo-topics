@@ -8,10 +8,10 @@
 //   None.
 //
 // Commands:
-//   hubot taboo term - mark this term as taboo
-//   hubot not taboo term - remove the term from the taboo list
-//   hubot taboo list - List all the taboo terms
-//   term - Admonish user not to speak about this term.
+//   hubot taboo <topic> - mark this topic as taboo
+//   hubot not taboo <topic> - remove the topic from the taboo list
+//   hubot taboo list - List all the taboo topics
+//   topic - Admonish user not to speak about this topic.
 //
 // Author:
 //   HaroldPutman
@@ -20,24 +20,25 @@
 
 module.exports = (robot) => {
   const responses = [
-    "Do not speak of ${term}.",
-    "${user}, I thought we agreed not to mention ${term}.",
-    "${term} should be forgotten.",
-    "We all pretend that ${term} never happened.",
-    "What is this ${term} you speak of?",
-    "${user}, you did not just bring up ${term}!"
+    "Do not speak of ${topic}.",
+    "${user}, I thought we agreed not to mention ${topic}.",
+    "${topic} should be forgotten.",
+    "We all pretend that ${topic} never happened.",
+    "What is this ${topic} you speak of?",
+    "${user}, you did not just bring up ${topic}!"
   ];
 
   var taboo = new Map();
   var taboolist = robot.brain.get("taboo");
   if (taboolist != null) {
-    for (term of taboolist) {
-      taboo.set(term, new RegExp(`\\b${term}\\b`, "i"));
+    for (topic of taboolist) {
+      taboo.set(topic, new RegExp(`\\b${topic}\\b`, "i"));
     }
   }
 
+
   /**
-   * Insert a term into a string formatted like a template string.
+   * Insert a topic into a string formatted like a template string.
    *   insert("Hello ${loc}", "loc", "World") -> "Hello World"
    */
   function insert(str, key, valu) {
@@ -58,77 +59,103 @@ module.exports = (robot) => {
    */
   function rememberList(brain) {
     var taboolist = [];
-    taboo.forEach((re, term) => {
-      taboolist.push(term);
+    taboo.forEach((re, topic) => {
+      taboolist.push(topic);
     });
     brain.set("taboo", taboolist);
   }
 
   /**
-   * Removes a term from the taboo list.
+   * Removes a topic from the taboo list.
    */
-  function deleteTerm(res, term) {
-    if (taboo.delete(term)) {
-      res.reply(capitalize(`${term} is no longer taboo`));
+  function deleteTopic(res, topic) {
+    if (taboo.delete(topic)) {
+      res.reply(capitalize(`${topic} is no longer taboo`));
       rememberList(res.robot.brain);
     } else {
-      res.reply(`Oops, ${term} is not taboo`);
+      res.reply(`Oops, ${topic} is not taboo`);
     }
   }
 
   /**
-   * Adds a new taboo term.
+   * Adds a new taboo topic.
    */
-  function addTerm(res, term) {
-    if (!taboo.has(term)) {
-      taboo.set(term, new RegExp(`\\b${term}\\b`, "i"));
+  function addTopic(res, topic) {
+    if (!taboo.has(topic)) {
+      taboo.set(topic, new RegExp(`\\b${topic}\\b`, "i"));
       rememberList(res.robot.brain);
-      res.reply(capitalize(`${term} is now taboo`));
+      res.reply(capitalize(`${topic} is now taboo`));
     } else {
-      res.reply(`Oops, ${term} is already taboo`);
+      res.reply(`Oops, ${topic} is already taboo`);
     }
   }
 
   /**
-   * Lists all the taboo terms.
+   * Lists all the taboo topics.
    */
-  function listTerms(res) {
+  function listTopics(res) {
     if (taboo.size == 0) {
       res.reply("Nothing is taboo here.");
     } else {
-      let terms = [];
-      taboo.forEach((re, term) => {
-        terms.push(term);
+      let topics = [];
+      taboo.forEach((re, topic) => {
+        topics.push(topic);
       })
-      res.reply("Taboo terms are: " + terms.join(", "));
+      res.reply("Taboo topics are: " + topics.join(", "));
     }
   }
 
   /**
-   * Handle the "taboo" commands
+   * Handle the "taboo" commands starting with topic.
    */
-  robot.respond(/(not |remove |un)?taboo (.*)/i, (res) => {
-    var term = res.match[2];
+  robot.respond(/(.+?) (is )?(not |no longer )?taboo$/i, (res) => {
+    var topic = res.match[1];
 
-    if (typeof res.match[1] !== "undefined") {
-      // not taboo <term>: clearing taboo term
-      deleteTerm(res, term);
-    } else {
-      if (term === "list") {
-        // taboo list: Show list of the taboo terms.
-        listTerms(res);
+    if (typeof res.match[3] !== "undefined") {
+      // <topic> is not taboo: clearing taboo topic
+      deleteTopic(res, topic);
+    }  else {
+      if (topic == "what" || topic == "list") {
+        // what is taboo: Show list of the taboo topics.
+        listTopics(res);
       } else {
-        // taboo <term>: Add a new taboo term
-        addTerm(res, term);
+        // <topic> is taboo: Add new taboo topic.
+        addTopic(res, topic);
       }
     }
   });
 
   /**
-   * Listen for taboo terms.
+   * Handle the "taboo" commands starting with taboo.
+   */
+  robot.respond(/(not |remove |un)?taboo (.+)/i, (res) => {
+    var topic = res.match[2];
+
+    if (typeof res.match[1] !== "undefined") {
+      // not taboo <topic>: clearing taboo topic
+      deleteTopic(res, topic);
+    } else {
+      if (topic === "list") {
+        // taboo list: Show list of the taboo topics.
+        listTopics(res);
+      } else {
+        // taboo <topic>: Add a new taboo topic
+        addTopic(res, topic);
+      }
+    }
+  });
+
+  let robotNameRe = new RegExp("^" + robot.name, "i");
+  /**
+   * Listen for taboo topics.
    */
   robot.listen((msg) => {
        if (msg.constructor.name === 'CatchAllMessage') {
+         return false;
+       }
+       if (msg.text.match(robotNameRe)) {
+         // Ignore taboo words spoken to Hubot. This prevents
+         // getting scolded immediately after setting taboo word.
          return false;
        }
        let matched = false;
@@ -142,9 +169,9 @@ module.exports = (robot) => {
        });
        return matched;
     }, (res) => {
-      // Complain about the use of taboo term.
+      // Complain about the use of taboo topic.
       let response = res.random(responses);
-      response = insert(response, "term", res.match);
+      response = insert(response, "topic", res.match);
       response = insert(response, "user", res.message.user.name);
       res.reply(capitalize(response));
     });
