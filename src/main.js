@@ -5,7 +5,7 @@
 //   None.
 //
 // Configuration:
-//   None.
+//   HUBOT_TABOO_FREQUENCY - How often taboo words should be noticed. (0-100)
 //
 // Commands:
 //   hubot taboo <topic> - mark this topic as taboo
@@ -28,14 +28,20 @@ module.exports = (robot) => {
     "${user}, you did not just bring up ${topic}!"
   ];
 
-  var taboo = new Map();
-  var taboolist = robot.brain.get("taboo");
+  const taboo = new Map();
+  const taboolist = robot.brain.get("taboo");
   if (taboolist != null) {
     for (topic of taboolist) {
       taboo.set(topic, new RegExp(`\\b${topic}\\b`, "i"));
     }
   }
 
+  // Get the frequency at which to complain
+  // 0 means never, 100 means always
+  let frequency = parseInt(process.env["HUBOT_TABOO_FREQUENCY"], 10);
+  if (frequency == NaN | frequency < 0 || frequency > 100) {
+    frequency = 100;
+  }
 
   /**
    * Insert a topic into a string formatted like a template string.
@@ -58,7 +64,7 @@ module.exports = (robot) => {
    * Rebuilds the taboolist in brain.
    */
   function rememberList(brain) {
-    var taboolist = [];
+    const taboolist = [];
     taboo.forEach((re, topic) => {
       taboolist.push(topic);
     });
@@ -69,7 +75,8 @@ module.exports = (robot) => {
    * Removes a topic from the taboo list.
    */
   function deleteTopic(res, topic) {
-    if (taboo.delete(topic)) {
+    const keyTopic = topic.toLowerCase();
+    if (taboo.delete(keyTopic)) {
       res.reply(capitalize(`${topic} is no longer taboo`));
       rememberList(res.robot.brain);
     } else {
@@ -81,8 +88,9 @@ module.exports = (robot) => {
    * Adds a new taboo topic.
    */
   function addTopic(res, topic) {
-    if (!taboo.has(topic)) {
-      taboo.set(topic, new RegExp(`\\b${topic}\\b`, "i"));
+    const keyTopic = topic.toLowerCase();
+    if (!taboo.has(keyTopic)) {
+      taboo.set(keyTopic, new RegExp(`\\b${topic}\\b`, "i"));
       rememberList(res.robot.brain);
       res.reply(capitalize(`${topic} is now taboo`));
     } else {
@@ -108,8 +116,8 @@ module.exports = (robot) => {
   /**
    * Handle the "taboo" commands starting with topic.
    */
-  robot.respond(/(.+?) (is )?(not |no longer )?taboo$/i, (res) => {
-    var topic = res.match[1];
+  robot.respond(/(?:(?:make|set) )?(.+?) (is )?(not |no longer )?taboo[.?!]?$/i, (res) => {
+    const topic = res.match[1];
 
     if (typeof res.match[3] !== "undefined") {
       // <topic> is not taboo: clearing taboo topic
@@ -128,8 +136,8 @@ module.exports = (robot) => {
   /**
    * Handle the "taboo" commands starting with taboo.
    */
-  robot.respond(/(not |remove |un)?taboo (.+)/i, (res) => {
-    var topic = res.match[2];
+  robot.respond(/(not |remove |un)?taboo (?:me )?(.+?)[.?!]?$/i, (res) => {
+    const topic = res.match[2];
 
     if (typeof res.match[1] !== "undefined") {
       // not taboo <topic>: clearing taboo topic
@@ -145,7 +153,8 @@ module.exports = (robot) => {
     }
   });
 
-  let robotNameRe = new RegExp("^" + robot.name, "i");
+  const robotNameRe = new RegExp("^" + robot.name, "i");
+
   /**
    * Listen for taboo topics.
    */
@@ -155,7 +164,7 @@ module.exports = (robot) => {
        }
        if (msg.text.match(robotNameRe)) {
          // Ignore taboo words spoken to Hubot. This prevents
-         // getting scolded immediately after setting taboo word.
+         // getting scolded immediately after setting a taboo topic.
          return false;
        }
        let matched = false;
@@ -170,10 +179,12 @@ module.exports = (robot) => {
        return matched;
     }, (res) => {
       // Complain about the use of taboo topic.
-      let response = res.random(responses);
-      response = insert(response, "topic", res.match);
-      response = insert(response, "user", res.message.user.name);
-      res.reply(capitalize(response));
+      if (Math.floor(Math.random() * 99 + 1) <= frequency) {
+        let response = res.random(responses);
+        response = insert(response, "topic", res.match);
+        response = insert(response, "user", res.message.user.name);
+        res.reply(capitalize(response));
+      }
     });
 
 };
