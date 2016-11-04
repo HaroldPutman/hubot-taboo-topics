@@ -18,7 +18,7 @@
 
 'use strict';
 
-module.exports = (robot) => {
+export default (robot) => {
   const responses = [
     "Do not speak of ${topic}.",
     "${user}, I thought we agreed not to mention ${topic}.",

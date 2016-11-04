@@ -1,6 +1,5 @@
-var Path = require('path');
-
-module.exports = function (robot) {
-  path = Path.resolve(__dirname, 'scripts');
-  robot.load(path);
-};
+require("babel-register");
+console.log("yes"); 
+var mainJs = require("./src/main");
+console.log(mainJs);
+module.exports = mainJs;
