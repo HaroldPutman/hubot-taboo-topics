@@ -41,7 +41,7 @@ module.exports = (robot) => {
   // Recall the Taboo list from brain
   const taboolist = robot.brain.get("taboo");
   if (taboolist != null) {
-    for (topic of taboolist) {
+    for (let topic of taboolist) {
       taboo.set(topic, new RegExp(`\\b${topic}\\b`, "i"));
     }
   }
@@ -49,7 +49,7 @@ module.exports = (robot) => {
   // Get the frequency at which to complain
   // 0 means never, 100 means always
   let frequency = parseInt(process.env["HUBOT_TABOO_FREQUENCY"], 10);
-  if (frequency == NaN | frequency < 0 || frequency > 100) {
+  if (isNaN(frequency) | frequency < 0 || frequency > 100) {
     frequency = 100;
   }
 
@@ -169,32 +169,32 @@ module.exports = (robot) => {
    * Listen for taboo topics.
    */
   robot.listen((msg) => {
-       if (msg.constructor.name === 'CatchAllMessage') {
-         return false;
-       }
-       if (msg.text.match(robotNameRe)) {
-         // Ignore taboo words spoken to Hubot. This prevents
-         // getting scolded immediately after setting a taboo topic.
-         return false;
-       }
-       let matched = false;
-       taboo.forEach((re) => {
-           if (!matched) {
-             var match = msg.text.match(re);
-             if (match) {
-               matched = match[0]
-             }
-           }
-       });
-       return matched;
-    }, (res) => {
-      // Complain about the use of taboo topic.
-      if (Math.floor(Math.random() * 99 + 1) <= frequency) {
-        let response = res.random(data.responses);
-        response = insert(response, "topic", res.match);
-        response = insert(response, "user", res.message.user.name);
-        res.reply(capitalize(response));
+    if (msg.constructor.name === 'CatchAllMessage') {
+      return false;
+    }
+    if (msg.text.match(robotNameRe)) {
+    // Ignore taboo words spoken to Hubot. This prevents
+    // getting scolded immediately after setting a taboo topic.
+      return false;
+    }
+    let matched = false;
+    taboo.forEach((re) => {
+      if (!matched) {
+        var match = msg.text.match(re);
+        if (match) {
+          matched = match[0]
+        }
       }
     });
+    return matched;
+  }, (res) => {
+    // Complain about the use of taboo topic.
+    if (Math.floor(Math.random() * 99 + 1) <= frequency) {
+      let response = res.random(data.responses);
+      response = insert(response, "topic", res.match);
+      response = insert(response, "user", res.message.user.name);
+      res.reply(capitalize(response));
+    }
+  });
 
 };

@@ -5,15 +5,15 @@
   "main": "dist/main.js",
   "license": "ISC",
   "author": {
-	  "name": "Harold Putman",
-	  "email": "harold.putman@lexmark.com"
+    "name": "Harold Putman",
+    "email": "harold.putman@lexmark.com"
   },
   "repository": "https://github.com//hubot-taboo-topics.git",
   "keywords": [
-	  "hubot-scripts",
+    "hubot-scripts",
     "hubot",
     "fun"
-  ]	,
+  ],
   "scripts": {
     "build": "babel src -d dist",
     "start": "babel src -d scripts; hubot --adapter shell --disable-httpd",
@@ -30,6 +30,7 @@
     "chai": "^3.4.1",
     "coffee-script": "^1.11.1",
     "coveralls": "^2.11.6",
+    "eslint": "^3.9.1",
     "hubot": "^2.19.0",
     "hubot-test-helper": "^1.4.4",
     "istanbul": "^1.0.0-alpha.2",

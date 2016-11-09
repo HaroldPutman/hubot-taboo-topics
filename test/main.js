@@ -27,26 +27,33 @@ NewMockResponse = (function(superClass) {
 
 describe('hubot', () => {
 
-	let room;
+  let room;
 
-	beforeEach(function() { room = helper.createRoom({response: NewMockResponse})});
-	afterEach(function() { room.destroy()});
+  beforeEach(function() { room = helper.createRoom({response: NewMockResponse})});
+  afterEach(function() { room.destroy()});
 
-	it('should respond when making topic taboo', (done) => {
+  it('should respond when making topic taboo', (done) => {
+    room.user.say('alice', 'hubot refactoring is taboo').then(() => {
+      expect(room.messages).to.eql([
+        ['alice', 'hubot refactoring is taboo'],
+        ['hubot', '@alice Refactoring is now taboo'],
+      ]);
+      done();
+    });
 
-		room.user.say('alice', 'hubot refactoring is taboo').then(() => {
-			room.user.say('alice', 'I love the taste of refactoring.').then(() => {
-				console.log(room.messages);
-				expect(room.messages).to.eql([
-					['alice', 'hubot refactoring is taboo'],
-					['hubot', '@alice Refactoring is now taboo'],
-					['alice', 'I love the taste of refactoring.'],
-					['hubot', '@alice Do not speak of refactoring.'],
-				]);
-				done();
-			});
-		});
+  });
 
-	});
-
+  it('should respond when making topic no longer taboo', (done) => {
+    room.user.say('becky', 'hubot taboo leverage.').then(() => {
+      room.user.say('becky', 'hubot untaboo leverage').then(() => {
+        expect(room.messages).to.eql([
+          ['becky', 'hubot taboo leverage.'],
+          ['hubot', '@becky Leverage is now taboo'],
+          ['becky', 'hubot untaboo leverage'],
+          ['hubot', '@becky Leverage is no longer taboo'],
+        ]);
+        done();
+      });
+    });
+  });
 });
