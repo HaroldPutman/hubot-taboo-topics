@@ -6,6 +6,9 @@
 //
 // Configuration:
 //   HUBOT_TABOO_FREQUENCY - How often taboo words should be noticed. (0-100)
+//   You can put your own text in a file `hubot-taboo-topics-data.json` in
+//   your hubot project. It should be a copy of data.json from this
+//   project.
 //
 // Commands:
 //   hubot taboo <topic> - mark this topic as taboo
@@ -18,17 +21,24 @@
 
 'use strict';
 
-export default (robot) => {
-  const responses = [
-    "Do not speak of ${topic}.",
-    "${user}, I thought we agreed not to mention ${topic}.",
-    "${topic} should be forgotten.",
-    "We all pretend that ${topic} never happened.",
-    "What is this ${topic} you speak of?",
-    "${user}, you did not just bring up ${topic}!"
-  ];
+const Path = require('path');
+
+module.exports = (robot) => {
+
+  let data = require('../data');
+
+  try {
+    // Attempt to load data from app directory.
+    data = require(Path.join(process.cwd(), "hubot-taboo-topics-data"));
+  } catch (e) {
+    if (e.code !== "MODULE_NOT_FOUND" ) {
+      throw e;
+    }
+  }
 
   const taboo = new Map();
+
+  // Recall the Taboo list from brain
   const taboolist = robot.brain.get("taboo");
   if (taboolist != null) {
     for (topic of taboolist) {
@@ -61,7 +71,7 @@ export default (robot) => {
   }
 
   /**
-   * Rebuilds the taboolist in brain.
+   * Stores the taboolist in brain.
    */
   function rememberList(brain) {
     const taboolist = [];
@@ -180,7 +190,7 @@ export default (robot) => {
     }, (res) => {
       // Complain about the use of taboo topic.
       if (Math.floor(Math.random() * 99 + 1) <= frequency) {
-        let response = res.random(responses);
+        let response = res.random(data.responses);
         response = insert(response, "topic", res.match);
         response = insert(response, "user", res.message.user.name);
         res.reply(capitalize(response));

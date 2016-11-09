@@ -1,0 +1,10 @@
+{
+  "responses":[
+    "Do not speak of ${topic}.",
+    "${user}, we all agreed not to bring up ${topic}.",
+    "${topic} should be forgotten.",
+    "${user}, Let's pretend you did not mention ${topic}.",
+    "What is this ${topic} you speak of?",
+    "It is forbidden to mention ${topic}!"
+  ]
+}

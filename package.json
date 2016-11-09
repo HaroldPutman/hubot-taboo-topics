@@ -1,34 +1,38 @@
 {
   "name": "hubot-taboo-topics",
   "version": "1.0.0",
-  "description": "Hubot responds when taboo topics are mentioned.",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/LexmarkWeb/hubot-taboo-topics.git"
-  },
+  "description": "Complain when taboo topics are mentioned",
+  "main": "dist/main.js",
   "license": "ISC",
-  "main": "index.js",
-  "scripts": {
-    "prestart": "gulp",
-    "prepublish": "gulp",
-    "start": "hubot --adapter shell --disable-httpd",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "author": {
+	  "name": "Harold Putman",
+	  "email": "harold.putman@lexmark.com"
   },
+  "repository": "https://github.com//hubot-taboo-topics.git",
   "keywords": [
+	  "hubot-scripts",
     "hubot",
-    "hubot-scripts"
-  ],
-  "dependencies": {
-    "babel-register": "^6.18.0",
-    "babel-preset-es2015": "^6.18.0",
-    "babel-plugin-add-module-exports": "^0.2.1"
+    "fun"
+  ]	,
+  "scripts": {
+    "build": "babel src -d dist",
+    "start": "babel src -d scripts; hubot --adapter shell --disable-httpd",
+    "prepublish": "babel src -d dist",
+    "test": "./node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha -- -R spec --require babel-register --require babel-polyfill --compilers coffee:coffee-script/register",
+    "coverage": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "devDependencies": {
-    "babel-eslint": "^7.1.0",
-    "del": "^2.2.2",
-    "gulp": "^3.9.1",
-    "gulp-babel": "^6.1.2",
-    "gulp-eslint": "^3.0.1",
-    "hubot": "^2.19.0"
+    "babel-cli": "^6.5.1",
+    "babel-core": "^6.2.1",
+    "babel-polyfill": "^6.16.0",
+    "babel-preset-es2015": "^6.1.18",
+    "babel-register": "^6.18.0",
+    "chai": "^3.4.1",
+    "coffee-script": "^1.11.1",
+    "coveralls": "^2.11.6",
+    "hubot": "^2.19.0",
+    "hubot-test-helper": "^1.4.4",
+    "istanbul": "^1.0.0-alpha.2",
+    "mocha": "^2.3.4"
   }
 }
