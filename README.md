@@ -45,7 +45,7 @@ npm start
 [npm-url]: https://npmjs.org/package/hubot-taboo-topics
 [travis-image]: https://travis-ci.org/HaroldPutman/hubot-taboo-topics.svg?branch=master
 [travis-url]: https://travis-ci.org/HaroldPutman/hubot-taboo-topics
-[daviddm-image]: https://david-dm.org/HaroldPutman/hubot-taboo-topics.svg?theme=shields.io
+[daviddm-image]: https://david-dm.org/haroldputman/hubot-taboo-topics/dev-status.svg?theme=shields.io
 [daviddm-url]: https://david-dm.org/HaroldPutman/hubot-taboo-topics
 [coveralls-image]: https://coveralls.io/repos/github/HaroldPutman/hubot-taboo-topics/badge.svg?branch=master
 [coveralls-url]:https://coveralls.io/github/HaroldPutman/hubot-taboo-topics?branch=master
