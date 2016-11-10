@@ -1,6 +1,6 @@
 {
   "name": "hubot-taboo-topics",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Complain when taboo topics are mentioned",
   "main": "dist/main.js",
   "license": "ISC",
