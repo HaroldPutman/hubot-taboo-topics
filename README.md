@@ -23,6 +23,9 @@ hubot-taboo-topics is configured by one environment variables:
 
 * `HUBOT_TABOO_FREQUENCY` - optional, the percentage of times that hubot will respond to mentions of the taboo terms. (integer, 0-100)
 
+You can customize the response text. Copy the file data.json from here to a
+file named `hubot-taboo-topics-data.json` in your hubot project folder. Then
+make the changes you want.
 
 ## Sample interaction
 
