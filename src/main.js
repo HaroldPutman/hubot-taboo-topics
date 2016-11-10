@@ -38,11 +38,15 @@ module.exports = (robot) => {
 
   const taboo = new Map();
 
+  loadList(robot.brain);
+
   // Recall the Taboo list from brain
-  const taboolist = robot.brain.get("taboo");
-  if (taboolist != null) {
-    for (let topic of taboolist) {
-      taboo.set(topic, new RegExp(`\\b${topic}\\b`, "i"));
+  function loadList(brain) {
+    const taboolist = brain.get("taboo");
+    if (taboolist != null) {
+      for (let topic of taboolist) {
+        taboo.set(topic, new RegExp(`\\b${topic}\\b`, "i"));
+      }
     }
   }
 
@@ -73,7 +77,7 @@ module.exports = (robot) => {
   /**
    * Stores the taboolist in brain.
    */
-  function rememberList(brain) {
+  function saveList(brain) {
     const taboolist = [];
     taboo.forEach((re, topic) => {
       taboolist.push(topic);
@@ -88,7 +92,7 @@ module.exports = (robot) => {
     const keyTopic = topic.toLowerCase();
     if (taboo.delete(keyTopic)) {
       res.reply(capitalize(`${topic} is no longer taboo`));
-      rememberList(res.robot.brain);
+      saveList(res.robot.brain);
     } else {
       res.reply(`Oops, ${topic} is not taboo`);
     }
@@ -101,7 +105,7 @@ module.exports = (robot) => {
     const keyTopic = topic.toLowerCase();
     if (!taboo.has(keyTopic)) {
       taboo.set(keyTopic, new RegExp(`\\b${topic}\\b`, "i"));
-      rememberList(res.robot.brain);
+      saveList(res.robot.brain);
       res.reply(capitalize(`${topic} is now taboo`));
     } else {
       res.reply(`Oops, ${topic} is already taboo`);
@@ -112,6 +116,7 @@ module.exports = (robot) => {
    * Lists all the taboo topics.
    */
   function listTopics(res) {
+    loadList(res.robot.brain); // Not necessary, but helps for testing.
     if (taboo.size == 0) {
       res.reply("Nothing is taboo here.");
     } else {
